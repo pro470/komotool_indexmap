@@ -13,6 +13,48 @@ pub mod serde_seq;
 #[cfg(test)]
 mod tests;
 
+#[cfg(feature = "functions")]
+use bevy_reflect::func::args::GetOwnership;
+#[cfg(feature = "functions")]
+use bevy_reflect::func::IntoReturn;
+#[cfg(feature = "functions")]
+use bevy_reflect::func::args::Arg;
+#[cfg(feature = "functions")]
+use bevy_reflect::func::Return;
+#[cfg(feature = "functions")]
+use bevy_reflect::func::args::Ownership;
+#[cfg(feature = "functions")]
+use bevy_reflect::func::ArgError;
+use bevy_reflect::{FromType, MaybeTyped};
+use bevy_reflect::Typed;
+use bevy_reflect::Reflect;
+use bevy_reflect::PartialReflect;
+use bevy_reflect::Map;
+use bevy_reflect::GetTypeRegistration;
+use bevy_reflect::FromReflect;
+use bevy_reflect::TypeParamInfo;
+use bevy_reflect::MapInfo;
+use bevy_reflect::Generics;
+use bevy_reflect::TypeRegistry;
+use bevy_reflect::TypeRegistration;
+use bevy_reflect::ReflectFromReflect;
+use bevy_reflect::ReflectFromPtr;
+use bevy_reflect::MapIter;
+use bevy_reflect::DynamicMap;
+use bevy_reflect::map_try_apply;
+use bevy_reflect::map_partial_eq;
+use bevy_reflect::map_apply;
+use bevy_reflect::TypeInfo;
+use bevy_reflect::ReflectRef;
+use bevy_reflect::ReflectOwned;
+use bevy_reflect::ReflectMut;
+use bevy_reflect::ReflectKind;
+use bevy_reflect::ReflectCloneError;
+use bevy_reflect::ApplyError;
+#[cfg(feature = "functions")]
+use crate::map::Return::Owned;
+#[cfg(feature = "functions")]
+use bevy_reflect::func::args::FromArg;
 pub use self::core::raw_entry_v1::{self, RawEntryApiV1};
 pub use self::core::{Entry, IndexedEntry, OccupiedEntry, VacantEntry};
 pub use self::iter::{
@@ -32,6 +74,17 @@ use ::core::mem;
 use ::core::ops::{Index, IndexMut, RangeBounds};
 use alloc::boxed::Box;
 use alloc::vec::Vec;
+#[cfg(feature = "functions")]
+use super::reflect::{impl_function_traits, impl_from_arg, impl_into_return, impl_get_ownership};
+use super::reflect::impl_reflect_for_hashmap;
+use super::reflect::impl_full_reflect;
+
+use bevy_reflect::utility::GenericTypeInfoCell;
+use crate::alloc::string::ToString;
+use std::borrow::Cow;
+use bevy_reflect::TypePath;
+
+
 
 #[cfg(feature = "std")]
 use std::collections::hash_map::RandomState;
@@ -84,15 +137,18 @@ use crate::{Bucket, Entries, Equivalent, GetDisjointMutError, HashValue, TryRese
 /// assert_eq!(letters.get(&'y'), None);
 /// ```
 #[cfg(feature = "std")]
+#[derive(TypePath)]
 pub struct IndexMap<K, V, S = RandomState> {
     pub(crate) core: IndexMapCore<K, V>,
     hash_builder: S,
 }
 #[cfg(not(feature = "std"))]
+#[derive(TypePath)]
 pub struct IndexMap<K, V, S> {
     pub(crate) core: IndexMapCore<K, V>,
     hash_builder: S,
 }
+
 
 impl<K, V, S> Clone for IndexMap<K, V, S>
 where
@@ -1649,3 +1705,17 @@ where
     S: BuildHasher,
 {
 }
+
+impl_reflect_for_hashmap!(IndexMap<K, V, S>);
+#[cfg(feature = "functions")]
+impl_function_traits!(IndexMap<K, V, S>;
+        <
+
+        K: FromReflect + MaybeTyped + TypePath + GetTypeRegistration + Eq + Hash,
+
+        V: FromReflect + MaybeTyped + TypePath + GetTypeRegistration,
+
+        S: TypePath + BuildHasher + Default + Send + Sync
+
+    >
+);

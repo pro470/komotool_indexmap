@@ -126,6 +126,7 @@ pub mod set;
 // are documented after the "normal" methods.
 #[cfg(feature = "rayon")]
 mod rayon;
+mod reflect;
 
 pub use crate::map::IndexMap;
 pub use crate::set::IndexSet;
