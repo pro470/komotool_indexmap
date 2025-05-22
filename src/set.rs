@@ -7,49 +7,49 @@ mod slice;
 #[cfg(test)]
 mod tests;
 
-#[cfg(feature = "functions")]
-use bevy_reflect::func::IntoReturn;
-#[cfg(feature = "functions")]
-use bevy_reflect::func::args::GetOwnership;
-#[cfg(feature = "functions")]
-use bevy_reflect::func::args::FromArg;
-#[cfg(feature = "functions")]
-use bevy_reflect::func::args::Arg;
-#[cfg(feature = "functions")]
-use bevy_reflect::func::Return;
-#[cfg(feature = "functions")]
-use bevy_reflect::func::args::Ownership;
-#[cfg(feature = "functions")]
-use bevy_reflect::func::ArgError;
-use bevy_reflect::FromType;
-use bevy_reflect::Typed;
-use bevy_reflect::Set;
-use bevy_reflect::Reflect;
-use bevy_reflect::PartialReflect;
-use bevy_reflect::GetTypeRegistration;
-use bevy_reflect::FromReflect;
-use bevy_reflect::TypeParamInfo;
-use bevy_reflect::SetInfo;
-use bevy_reflect::Generics;
-use bevy_reflect::TypeRegistry;
-use bevy_reflect::TypeRegistration;
-use bevy_reflect::ReflectFromReflect;
-use bevy_reflect::ReflectFromPtr;
-use bevy_reflect::set_try_apply;
-use bevy_reflect::set_partial_eq;
-use bevy_reflect::set_apply;
-use bevy_reflect::TypeInfo;
-use bevy_reflect::ReflectRef;
-use bevy_reflect::ReflectOwned;
-use bevy_reflect::ReflectMut;
-use bevy_reflect::ReflectKind;
-use bevy_reflect::ReflectCloneError;
-use bevy_reflect::ApplyError;
 pub use self::iter::{
     Difference, Drain, Intersection, IntoIter, Iter, Splice, SymmetricDifference, Union,
 };
 pub use self::mutable::MutableValues;
 pub use self::slice::Slice;
+#[cfg(feature = "functions")]
+use bevy_reflect::func::args::Arg;
+#[cfg(feature = "functions")]
+use bevy_reflect::func::args::FromArg;
+#[cfg(feature = "functions")]
+use bevy_reflect::func::args::GetOwnership;
+#[cfg(feature = "functions")]
+use bevy_reflect::func::args::Ownership;
+#[cfg(feature = "functions")]
+use bevy_reflect::func::ArgError;
+#[cfg(feature = "functions")]
+use bevy_reflect::func::IntoReturn;
+#[cfg(feature = "functions")]
+use bevy_reflect::func::Return;
+use bevy_reflect::set_apply;
+use bevy_reflect::set_partial_eq;
+use bevy_reflect::set_try_apply;
+use bevy_reflect::ApplyError;
+use bevy_reflect::FromReflect;
+use bevy_reflect::FromType;
+use bevy_reflect::Generics;
+use bevy_reflect::GetTypeRegistration;
+use bevy_reflect::PartialReflect;
+use bevy_reflect::Reflect;
+use bevy_reflect::ReflectCloneError;
+use bevy_reflect::ReflectFromPtr;
+use bevy_reflect::ReflectFromReflect;
+use bevy_reflect::ReflectKind;
+use bevy_reflect::ReflectMut;
+use bevy_reflect::ReflectOwned;
+use bevy_reflect::ReflectRef;
+use bevy_reflect::Set;
+use bevy_reflect::SetInfo;
+use bevy_reflect::TypeInfo;
+use bevy_reflect::TypeParamInfo;
+use bevy_reflect::TypeRegistration;
+use bevy_reflect::TypeRegistry;
+use bevy_reflect::Typed;
 
 #[cfg(feature = "rayon")]
 pub use crate::rayon::set as rayon;
@@ -58,6 +58,10 @@ use crate::TryReserveError;
 #[cfg(feature = "std")]
 use std::collections::hash_map::RandomState;
 
+use super::reflect::impl_full_reflect;
+use super::reflect::impl_reflect_for_hashset;
+#[cfg(feature = "functions")]
+use super::reflect::{impl_from_arg, impl_function_traits, impl_get_ownership, impl_into_return};
 use crate::util::try_simplify_range;
 use alloc::boxed::Box;
 use alloc::vec::Vec;
@@ -65,17 +69,13 @@ use core::cmp::Ordering;
 use core::fmt;
 use core::hash::{BuildHasher, Hash};
 use core::ops::{BitAnd, BitOr, BitXor, Index, RangeBounds, Sub};
-use super::reflect::impl_reflect_for_hashset;
-#[cfg(feature = "functions")]
-use super::reflect::{impl_function_traits, impl_from_arg, impl_into_return, impl_get_ownership};
-use super::reflect::impl_full_reflect;
 
-use bevy_reflect::utility::GenericTypeInfoCell;
 use crate::alloc::string::ToString;
-use std::borrow::Cow;
-use bevy_reflect::TypePath;
 #[cfg(feature = "functions")]
 use crate::set::Return::Owned;
+use bevy_reflect::utility::GenericTypeInfoCell;
+use bevy_reflect::TypePath;
+use std::borrow::Cow;
 
 use super::{Entries, Equivalent, IndexMap};
 
@@ -139,7 +139,6 @@ pub struct IndexSet<T, S = RandomState> {
 pub struct IndexSet<T, S> {
     pub(crate) map: IndexMap<T, (), S>,
 }
-
 
 impl<T, S> Clone for IndexSet<T, S>
 where

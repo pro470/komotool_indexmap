@@ -547,7 +547,6 @@ macro_rules! impl_full_reflect {
 
 }
 
-
 macro_rules! impl_reflect_for_hashset {
 
     ($ty:path) => {
@@ -1437,15 +1436,14 @@ macro_rules! impl_into_return {
 
 }
 
-
 #[cfg(feature = "functions")]
-pub(crate) use impl_into_return;
+pub(crate) use impl_from_arg;
+pub(crate) use impl_full_reflect;
+#[cfg(feature = "functions")]
+pub(crate) use impl_function_traits;
 #[cfg(feature = "functions")]
 pub(crate) use impl_get_ownership;
 #[cfg(feature = "functions")]
-pub(crate) use impl_from_arg;
-#[cfg(feature = "functions")]
-pub(crate) use impl_function_traits;
-pub(crate) use impl_full_reflect;
+pub(crate) use impl_into_return;
 pub(crate) use impl_reflect_for_hashmap;
 pub(crate) use impl_reflect_for_hashset;
