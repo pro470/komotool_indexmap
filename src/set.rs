@@ -70,14 +70,15 @@ use core::fmt;
 use core::hash::{BuildHasher, Hash};
 use core::ops::{BitAnd, BitOr, BitXor, Index, RangeBounds, Sub};
 
+use super::{Entries, Equivalent, IndexMap};
 use crate::alloc::string::ToString;
 #[cfg(feature = "functions")]
 use crate::set::Return::Owned;
+use bevy_ecs::entity::Entity;
+use bevy_ecs::relationship::RelationshipSourceCollection;
 use bevy_reflect::utility::GenericTypeInfoCell;
 use bevy_reflect::TypePath;
 use std::borrow::Cow;
-
-use super::{Entries, Equivalent, IndexMap};
 
 type Bucket<T> = super::Bucket<T, ()>;
 
@@ -1348,6 +1349,51 @@ where
     /// Values are collected in the same order that they appear in `self`.
     fn sub(self, other: &IndexSet<T, S2>) -> Self::Output {
         self.difference(other).cloned().collect()
+    }
+}
+impl RelationshipSourceCollection for IndexSet<Entity> {
+    type SourceIter<'a> = core::iter::Copied<Iter<'a, Entity>>;
+
+    fn new() -> Self {
+        IndexSet::<Entity>::new()
+    }
+
+    fn with_capacity(capacity: usize) -> Self {
+        IndexSet::<Entity>::with_capacity(capacity)
+    }
+
+    fn reserve(&mut self, additional: usize) {
+        self.reserve(additional);
+    }
+
+    fn add(&mut self, entity: Entity) -> bool {
+        self.insert(entity)
+    }
+
+    fn remove(&mut self, entity: Entity) -> bool {
+        // We need to call the remove method on the underlying hash set,
+        // which takes its argument by reference
+        self.shift_remove(&entity)
+    }
+
+    fn iter(&self) -> Self::SourceIter<'_> {
+        self.iter().copied()
+    }
+
+    fn len(&self) -> usize {
+        self.len()
+    }
+
+    fn clear(&mut self) {
+        self.clear();
+    }
+
+    fn shrink_to_fit(&mut self) {
+        self.shrink_to_fit();
+    }
+
+    fn extend_from_iter(&mut self, entities: impl IntoIterator<Item = Entity>) {
+        self.extend(entities);
     }
 }
 
